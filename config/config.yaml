@@ -1,0 +1,60 @@
+data:
+  raw_path: "data/raw/train.txt"
+  processed_path: "data/processed/"
+  sample_path: "data/sample/"
+  sample_size: 1000000  # 1M rows for testing
+
+spark:
+  app_name: "FeatureForge"
+  master: "local[*]"
+  executor_memory: "4g"
+  driver_memory: "4g"
+
+features:
+  numerical_cols: ["I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8", "I9",
+                   "I10", "I11", "I12", "I13"]
+  categorical_cols: ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9",
+                     "C10", "C11", "C12", "C13", "C14", "C15", "C16", "C17",
+                     "C18", "C19", "C20", "C21", "C22", "C23", "C24", "C25", "C26"]
+  target_col: "click"
+  timestamp_col: "hour"
+
+  # Feature groups for baseline
+  baseline:
+    count_encoding: true
+    target_encoding: true
+    target_encoding_cols: ["C1", "C2", "C3", "C4", "C5"]  # Top 5 categoricals
+    numerical_features: true
+
+model:
+  algorithm: "xgboost"
+  test_size: 0.2
+  val_size: 0.1
+  random_state: 42
+
+  xgboost_params:
+    objective: "binary:logistic"
+    eval_metric: "auc"
+    max_depth: 6
+    learning_rate: 0.1
+    n_estimators: 100
+    scale_pos_weight: 30  # Adjust based on actual class imbalance
+    subsample: 0.8
+    colsample_bytree: 0.8
+    min_child_weight: 1
+
+  lightgbm_params:
+    objective: "binary"
+    metric: "auc"
+    boosting_type: "gbdt"
+    num_leaves: 31
+    learning_rate: 0.05
+    feature_fraction: 0.9
+    bagging_fraction: 0.8
+    bagging_freq: 5
+    verbose: 0
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/featureforge.log"
